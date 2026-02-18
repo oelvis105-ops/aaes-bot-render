@@ -1,5 +1,15 @@
 import os
+import json
 import logging
+
+sa_json = os.getenv("GOOGLE_SA_JSON")
+if sa_json:
+    with open("service_account.json", "w") as f:
+        f.write(sa_json)
+    print("✅ service_account.json created from environment")
+else:
+    print("⚠️ GOOGLE_SA_JSON not set - Google Drive will fail")
+    
 from flask import Flask, request
 from telegram import Update
 
