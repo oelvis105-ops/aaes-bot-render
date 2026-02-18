@@ -9,7 +9,18 @@ if sa_json:
     print("✅ service_account.json created from environment")
 else:
     print("⚠️ GOOGLE_SA_JSON not set - Google Drive will fail")
-    
+# ========== CREATE SERVICE ACCOUNT JSON FIRST ==========
+import base64
+
+sa_json_b64 = os.getenv("GOOGLE_SA_JSON_B64")
+if sa_json_b64:
+    # Decode base64 to get original JSON
+    sa_json = base64.b64decode(sa_json_b64).decode('utf-8')
+    with open("service_account.json", "w") as f:
+        f.write(sa_json)
+    print("✅ service_account.json created from base64 environment")
+else:
+    print("⚠️ GOOGLE_SA_JSON_B64 not set - Google Drive will fail")    
 from flask import Flask, request
 from telegram import Update
 
