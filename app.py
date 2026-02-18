@@ -57,15 +57,18 @@ def webhook():
     telegram_app.process_update(update)
     return "ok", 200
 
+import asyncio
+
 def run():
-    # Set webhook
+    # Set webhook properly
     render_url = os.getenv("RENDER_EXTERNAL_URL")
     if render_url:
         webhook_url = f"{render_url}/webhook"
-        telegram_app.bot.set_webhook(url=webhook_url)
+        # Run async set_webhook in sync context
+        asyncio.run(telegram_app.bot.set_webhook(url=webhook_url))
         logger.info(f"Webhook set: {webhook_url}")
     
-    port = int(os.getenv("PORT", 5000))
+    port = int(os.getenv("PORT", 10000))
     flask_app.run(host="0.0.0.0", port=port)
 
 if __name__ == "__main__":
