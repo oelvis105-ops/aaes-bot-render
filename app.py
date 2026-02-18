@@ -58,15 +58,30 @@ def webhook():
     return "ok", 200
 
 import asyncio
+import re
 
 def run():
     # Set webhook properly
-    render_url = os.getenv("RENDER_EXTERNAL_URL")
+    render_url = os.getenv("RENDER_EXTERNAL_URL", "").strip()
+    
+    # Remove any non-printable characters
+    render_url = ''.join(char for char in render_url if ord(char) >= 32 and ord(char) <= 126)
+    
+    # Ensure it starts with https://
+    if render_url and not render_url.startswith('http'):
+        render_url = f"https://{render_url}"
+    
     if render_url:
         webhook_url = f"{render_url}/webhook"
-        # Run async set_webhook in sync context
-        asyncio.run(telegram_app.bot.set_webhook(url=webhook_url))
-        logger.info(f"Webhook set: {webhook_url}")
+        logger.info(f"Setting webhook to: {webhook_url}")
+        try:
+            # Run async set_webhook in sync context
+            asyncio.run(telegram_app.bot.set_webhook(url=webhook_url))
+            logger.info(f"✅ Webhook set successfully")
+        except Exception as e:
+            logger.error(f"❌ Failed to set webhook: {e}")
+    else:
+        logger.warning("⚠️ RENDER_EXTERNAL_URL not set, skipping webhook setup")
     
     port = int(os.getenv("PORT", 10000))
     flask_app.run(host="0.0.0.0", port=port)
